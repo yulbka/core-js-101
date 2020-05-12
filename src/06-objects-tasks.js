@@ -20,8 +20,15 @@
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  const obj = {
+    width,
+    height,
+    getArea() {
+      return this.width * this.height;
+    },
+  };
+  return obj;
 }
 
 
@@ -35,10 +42,9 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
-
 
 /**
  * Returns the object of specified type from JSON representation
@@ -51,8 +57,9 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  const val = JSON.parse(json);
+  return Object.assign(Object.create(proto), val);
 }
 
 
@@ -111,33 +118,81 @@ function fromJSON(/* proto, json */) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+
+  element(value) {
+    const obj = Object.create(this);
+    if (obj.elemSelector) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    } else {
+      obj.elemSelector = value;
+    }
+    this.order(obj, obj.elemSelector);
+    return obj;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    const obj = Object.create(this);
+    if (obj.idSelector) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    } else {
+      obj.idSelector = `#${value}`;
+    }
+    this.order(obj, obj.idSelector);
+    return obj;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    const obj = Object.create(this);
+    obj.classSelector = `${obj.classSelector || ''}.${value}`;
+    this.order(obj, obj.classSelector);
+    return obj;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    const obj = Object.create(this);
+    obj.attrSelector = `${obj.attrSelector || ''}[${value}]`;
+    this.order(obj, obj.attrSelector);
+    return obj;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    const obj = Object.create(this);
+    obj.pseudoClassSelector = `${obj.pseudoClassSelector || ''}:${value}`;
+    this.order(obj, obj.pseudoClassSelector);
+    return obj;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    const obj = Object.create(this);
+    if (obj.pseudoElemSelector) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    } else {
+      obj.pseudoElemSelector = `::${value}`;
+    }
+    this.order(obj, obj.pseudoElemSelector);
+    return obj;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    const obj = Object.create(this);
+    obj.combineSelector = `${obj.combineSelector || ''}${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+    return obj;
   },
+
+  stringify() {
+    return `${this.combineSelector || ''}${this.elemSelector || ''}${this.idSelector || ''}${this.classSelector || ''}${this.attrSelector || ''}${this.pseudoClassSelector || ''}${this.pseudoElemSelector || ''}`;
+  },
+
+  order(obj, selector) {
+    const orderArr = [obj.elemSelector, obj.idSelector, obj.classSelector,
+      obj.attrSelector, obj.pseudoClassSelector, obj.pseudoElemSelector];
+    orderArr.forEach((item, index) => {
+      if (item && index > orderArr.indexOf(selector)) {
+        throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+      }
+    });
+  },
+
 };
 
 
