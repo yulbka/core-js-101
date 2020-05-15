@@ -1,3 +1,4 @@
+/* eslint-disable prefer-rest-params */
 /* *********************************************************************************************
  *                                                                                             *
  * Plese read the following tutorial before implementing tasks:                                *
@@ -68,8 +69,13 @@ function getPowerFunction(exponent) {
  *   getPolynom(8)     => y = 8
  *   getPolynom()      => null
  */
-function getPolynom() {
-  throw new Error('Not implemented');
+function getPolynom(...args) {
+  return function fn(x) {
+    if (args.length === 1) return args[0];
+    if (args.length === 2) return x * args[0] + args[1];
+    if (args.length === 3) return x * x * args[0] + x * args[1] + args[2];
+    return null;
+  };
 }
 
 
@@ -87,8 +93,18 @@ function getPolynom() {
  *   ...
  *   memoizer() => the same random number  (next run, returns the previous cached result)
  */
-function memoize(/* func */) {
-  throw new Error('Not implemented');
+function memoize(func) {
+  const cache = [];
+  let callNums = 0;
+  // eslint-disable-next-line func-names
+  return function () {
+    if (!callNums) {
+      const result = func();
+      cache.push(result);
+    }
+    callNums += 1;
+    return cache[0];
+  };
 }
 
 
@@ -107,10 +123,20 @@ function memoize(/* func */) {
  * }, 2);
  * retryer() => 2
  */
-function retry(/* func, attempts */) {
-  throw new Error('Not implemented');
+function retry(func, attempts) {
+  let count = 0;
+  return function fn() {
+    try {
+      count += 1;
+      return func();
+    } catch (e) {
+      if (count <= attempts) {
+        return fn();
+      }
+      return attempts;
+    }
+  };
 }
-
 
 /**
  * Returns the logging wrapper for the specified method,
@@ -135,8 +161,15 @@ function retry(/* func, attempts */) {
  * cos(3.141592653589793) ends
  *
  */
-function logger(/* func, logFunc */) {
-  throw new Error('Not implemented');
+function logger(func, logFunc) {
+  return function fn() {
+    let args = JSON.stringify([...arguments]);
+    args = args.slice(1, -1);
+    logFunc(`${func.name}(${args}) starts`);
+    const result = func.apply(this, arguments);
+    logFunc(`${func.name}(${args}) ends`);
+    return result;
+  };
 }
 
 
