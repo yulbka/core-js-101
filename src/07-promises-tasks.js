@@ -107,10 +107,22 @@ function getFastestPromise(array) {
  *
  */
 function chainPromises(array, action) {
+  const result = [];
   return new Promise((resolve) => {
-    resolve(array.map((item) => action(item)));
+    array.forEach((promise) => {
+      promise
+        .then((item) => {
+          result.push(item);
+          if (result.length === array.length) {
+            resolve(result.reduce(action));
+          }
+        }).catch(() => {
+          resolve(result.reduce(action));
+        });
+    });
   });
 }
+
 
 module.exports = {
   willYouMarryMe,

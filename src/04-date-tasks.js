@@ -92,7 +92,7 @@ function timeSpanToString(startDate, endDate) {
   let sec = Math.trunc((timespan - hours * hoursMs - mins * minMs) / secMs);
   if (sec < 10) sec = `0${sec}`;
   let ms = timespan - hours * hoursMs - mins * minMs - sec * secMs;
-  if (ms < 100) ms = `00${ms}`;
+  if (ms < 10) ms = `00${ms}`;
   return `${hours}:${mins}:${sec}.${ms}`;
 }
 
